@@ -13,6 +13,9 @@ import '@mdi/font/css/materialdesignicons.min.css'
 const vuetify = createVuetify({
   components,
   directives,
+  icons: {
+    iconfont: 'mdi',
+  },
 })
 
 createApp(App).use(store).use(router).use(vuetify).mount('#app')
