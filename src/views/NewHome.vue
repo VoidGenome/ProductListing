@@ -1,14 +1,15 @@
 <template>
     <div>
-        <v-responsive>
-            <v-toolbar>
+        <v-responsive fluid>
+            <v-toolbar class='backgroundColor'>
                 <v-container>
                     <v-row class="mb-n7">
                         <v-col cols="6">
 
                         </v-col>
                         <v-col cols="5">
-                            <v-text-field v-model="searchValue" density="compact" :clearable="true" placeholder="Search"
+                            <v-text-field rounded class="textFieldColor" variant='solo' v-model="searchValue"
+                                density="compact" :clearable="true" placeholder="Search"
                                 prepend-inner-icon="mdi-magnify">
 
                             </v-text-field>
@@ -36,32 +37,33 @@
                 </v-col>
 
             </v-row>
-            <v-container>
+            <v-container fluid>
                 <v-row>
-                    <div class="mr-10 mb-5" v-for="(item, index) in computedArrayOfItems" :key="index">
-
-
-                        <v-card rounded height="300px" width="300px">
-                            <v-card-title v-bind="title">{{ item.title }}</v-card-title>  
+                    <v-col cols="12" sm="6" md="4" lg="4" xl="4" class="mr-10 mb-5"
+                        v-for="(item, index) in computedArrayOfItems" :key="index">
+                        <v-card elevation="3" class="rounded-card responsive-card">
+                            <v-card-title class="titleStyle">{{ item.title }}</v-card-title>
                             <v-divider />
                             <v-tooltip>
                                 <template v-slot:activator="{ image }">
                                     <img v-bind="image" :src="item.image" width="40%" height="40%" />
                                 </template>
-                                <v-card height="500px" width="500px">
+                                <!-- <v-card height="500px" width="500px">
                                     <v-container>
                                         <img :src="item.image" width="80%" height="80%" />
                                     </v-container>
-                                </v-card>
+                                </v-card> -->
                             </v-tooltip>
 
                         </v-card>
 
 
-                    </div>
+                    </v-col>
                 </v-row>
             </v-container>
+            <v-footer v-if="!loading" class="backgroundColor">
 
+            </v-footer>
         </v-responsive>
     </div>
 </template>
@@ -113,15 +115,15 @@ let computedArrayOfItems = computed(() => {
     else {
         if (category.value == 'allCategories') {
             return arrayOfItems.items
-                .filter((el) => el.category.includes(searchValue.value))
-                .filter((el) => el.title.includes(searchValue.value))
-                .filter((el) => el.category.includes(searchValue.value))
+                // .filter((el) => el.category.toUpperCase().includes(searchValue.value.trim().toUpperCase()))
+                .filter((el) => el.title.toUpperCase().includes(searchValue.value.trim().toUpperCase()))
+                // .filter((el) => el.category.toUpperCase().includes(searchValue.value.trim().toUpperCase()))
         }
         else {
             return arrayOfItems.items.filter((el) => category.value == el.category)
-                .filter((el) => el.category.includes(searchValue.value))
-                .filter((el) => el.title.includes(searchValue.value))
-                .filter((el) => el.category.includes(searchValue.value))
+                // .filter((el) => el.category.toUpperCase().includes(searchValue.value.trim().toUpperCase()))
+                .filter((el) => el.title.toUpperCase().includes(searchValue.value.trim().toUpperCase()))
+                // .filter((el) => el.category.toUpperCase().includes(searchValue.value.trim().toUpperCase()))
         }
     }
 })
@@ -147,5 +149,51 @@ let computedArrayOfItems = computed(() => {
 
 .small-radio [class*="__ripple"] {
     left: 0;
+}
+.rounded-card {
+    border-radius: 15px;
+}
+.backgroundColor {
+    background-image: linear-gradient(to bottom, #534a46, #5a514e, #615956, #68605e, #6f6866, #706967, #716b68, #726c69, #6d6763, #69615e, #645c58, #605753);
+}
+.textFieldColor{
+    color: white;
+    
+}
+.titleStyle{
+    font-size: 13px;
+}
+.responsive-card {
+    width: 100%;
+    /* Default width */
+    height: auto;
+    /* Allow the height to adjust based on content */
+}
+
+@media only screen and (min-width: 600px) {
+
+    /* Adjustments for small screens and up */
+    .responsive-card {
+        width: 50%;
+        /* Adjust width for small screens and up */
+    }
+}
+
+@media only screen and (min-width: 960px) {
+
+    /* Adjustments for medium screens and up */
+    .responsive-card {
+        width: 33%;
+        /* Adjust width for medium screens and up */
+    }
+}
+
+@media only screen and (min-width: 1264px) {
+
+    /* Adjustments for large screens and up */
+    .responsive-card {
+        width: 25%;
+        /* Adjust width for large screens and up */
+    }
 }
 </style>
