@@ -3,6 +3,16 @@
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
   </nav> -->
+  <!-- <v-app>
+    <v-app-bar app color="primary">
+      
+    </v-app-bar>
+
+    
+    <v-main>
+    
+    </v-main>
+  </v-app> -->
   <v-app>
     <router-view />
   </v-app>

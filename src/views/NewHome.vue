@@ -1,10 +1,10 @@
 <template>
     <div>
         <v-responsive fluid>
-            <v-toolbar class='backgroundColor'>
+            <v-toolbar scroll-off-screen fixed class='backgroundColor'>
                 <v-container>
                     <v-row class="mb-n7">
-                        <v-col cols="6">
+                        <v-col cols="5">
 
                         </v-col>
                         <v-col cols="5">
@@ -14,6 +14,26 @@
 
                             </v-text-field>
                         </v-col>
+                        <v-col cols="1">
+                            <v-tooltip>
+                                <template v-slot:activator="{props}">
+                                    <v-btn v-bind="props" rounded @click='updateStatus = !updateStatus'
+                                        class="updateButtonColor"><v-icon
+                                            :class="updateStatus?'spin-icon':''">mdi-update</v-icon></v-btn>
+                                </template>
+                                <span>Update Details</span>
+                            </v-tooltip>
+                        </v-col>
+                        <v-col cols="1">
+                            <v-tooltip>
+                                <template v-slot:activator="{ props }">
+                                    <v-btn v-bind="props" variant="flat" @click='dialogModel = true'
+                                        class="addButtonColor"><v-icon>mdi-plus</v-icon></v-btn>
+                                </template>
+                                <span>Add items</span>
+                            </v-tooltip>
+                        </v-col>
+
                     </v-row>
                 </v-container>
             </v-toolbar>
@@ -37,31 +57,65 @@
                 </v-col>
 
             </v-row>
-            <v-container fluid>
+            <span v-if='computedArrayOfItems==0 && loading ==false'>No results found </span>
+            <v-container>
                 <v-row>
-                    <v-col cols="12" sm="6" md="4" lg="4" xl="4" class="mr-10 mb-5"
-                        v-for="(item, index) in computedArrayOfItems" :key="index">
-                        <v-card elevation="3" class="rounded-card responsive-card">
+                    <div class="mr-10 mb-5" v-for="(item, index) in computedArrayOfItems" :key="index">
+                        <v-card height="300px" width="300px" class="rounded-card responsive-card">
                             <v-card-title class="titleStyle">{{ item.title }}</v-card-title>
                             <v-divider />
                             <v-tooltip>
-                                <template v-slot:activator="{ image }">
-                                    <img v-bind="image" :src="item.image" width="40%" height="40%" />
+                                <template v-slot:activator="{ props }">
+                                    <img v-bind="props" :src="item.image" width="40%" height="40%" />
                                 </template>
-                                <!-- <v-card height="500px" width="500px">
+                                <v-card style="height: auto;width:300px">
                                     <v-container>
-                                        <img :src="item.image" width="80%" height="80%" />
+                                        <img :src="item.image" width="40%" height="40%" />
+                                        <br />
+                                        <span>{{ item.description }}</span>
                                     </v-container>
-                                </v-card> -->
+                                </v-card>
+
                             </v-tooltip>
+
+                            <v-chip color='success'><v-icon>mdi-tag</v-icon><v-icon>mdi-currency-usd</v-icon>{{
+                                item.price }}</v-chip>
+
+                            <v-chip size="x-small"
+                                :style="+item.rating.rate < 3.0 ? 'color:red' : 'background-color:yellow'"><v-icon>mdi-star-outline</v-icon><span
+                                    :style="'font-color:black'">{{item.rating.rate
+                                    }}</span></v-chip>
+                            <div class="likeButton">
+                                <v-icon color='pink'>mdi-heart</v-icon> <small>{{ item.rating.count }}</small>
+                            </div>
+                            <div class="floating-button" v-if='updateStatus'>
+                                <!-- Your floating button content goes here -->
+                                <v-tooltip color='green' top>
+                                    <template v-slot:activator="{props}">
+                                        <v-icon @click="updateDetails(item)" v-bind='props' class="rating-icon mr-4"
+                                            color="success">mdi-pencil</v-icon>
+                                    </template>
+                                    <span>Update Details</span>
+                                </v-tooltip>
+                                <v-tooltip color='red' top>
+                                    <template v-slot:activator="{ props }">
+                                        <v-icon @click="deleteItem(item.id)" v-bind='props' class="rating-icon"
+                                            color="error">mdi-delete</v-icon>
+                                    </template>
+                                    <span>Delete Item</span>
+                                </v-tooltip>
+
+                            </div>
 
                         </v-card>
 
 
-                    </v-col>
+                    </div>
                 </v-row>
             </v-container>
-            <v-footer v-if="!loading" class="backgroundColor">
+            <AddItem :dialogModel="dialogModel" @closeDialog='closeDialog' :itemData="itemData"
+                @updateLoadItemsData="updateLoadItemsData" />
+            <v-footer v-if=" !loading" class="backgroundColor">
 
             </v-footer>
         </v-responsive>
@@ -69,20 +123,22 @@
 </template>
 
 <script setup>
-import { ref,onMounted,reactive,watchEffect,computed } from "vue"
+import { ref, onMounted, reactive, watchEffect, computed } from "vue"
+import Swal from "sweetalert2"
+import AddItem from "./AddItem.vue"
 
-// const count = ref(0)
 let loading = ref(true)
+let dialogModel =ref(false)
+// let fab = reactive(false)
 let category = ref("allCategories")
 let arrayOfItems = reactive({items:[]})
 let searchValue = ref("")
+let itemData = ref("")
+let updateStatus = ref(false)
 // functions that mutate state and trigger updates
-
-
-onMounted(() => {
-    console.log(arrayOfItems, "then")
+function loadItems() {
     loading.value = true
-    fetch("https://fakestoreapi.com/products").then(res => res.json())
+    fetch(process.env.VUE_APP_STORE_API_PRODUCTS).then(res => res.json())
         .then(json => {
             arrayOfItems.items = json
             loading.value = false
@@ -95,8 +151,56 @@ onMounted(() => {
         })
     console.log(arrayOfItems, "now")
 
-    
+
     console.log(loading)
+}
+function updateDetails(val) {
+    itemData.value = val
+    dialogModel.value = true
+}
+
+function deleteItem(val) {
+    console.log(val)
+    Swal.fire({
+        title: "Delete this item?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Confirm",
+        toast:true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+
+            fetch(`https://fakestoreapi.com/products/${val}`, {
+                method: "DELETE"
+            })
+                .then(res => res.json())
+                .then(json => {
+                    console.log(json)
+                    Swal.fire({
+                        title: "Deleted!",
+                        text: "The Item has been deleted.",
+                        icon: "success"
+                    });
+                })
+            loadItems()
+            
+        }
+    });
+}
+function closeDialog(val) {
+    dialogModel.value = val
+    itemData.value = ""
+}
+function updateLoadItemsData(val) {
+    dialogModel.value = val
+}
+
+onMounted(() => {
+    console.log(arrayOfItems, "then")
+    loadItems()
     // Perform actions after the component is mounted
     
 });
@@ -163,37 +267,52 @@ let computedArrayOfItems = computed(() => {
 .titleStyle{
     font-size: 13px;
 }
-.responsive-card {
-    width: 100%;
-    /* Default width */
-    height: auto;
-    /* Allow the height to adjust based on content */
+.updateButtonColor{
+    
+    background-color: greenyellow;
+}
+.addButtonColor{
+    background-color: green;
+
+}
+.floating-button {
+    position: absolute;
+    bottom: 10px;
+    /* Adjust as needed */
+    right: 10px;
+    /* Adjust as needed */
+    z-index: 1;
+    /* Ensure it appears above other content */
+}
+.likeButton {
+    position: absolute;
+    bottom: 10px;
+    /* Adjust as needed */
+    left: 10px;
+    /* Adjust as needed */
+    z-index: 1;
+    /* Ensure it appears above other content */
+}
+.rating-icon {
+    transition: transform 0.2s ease;
+    /* Add transition for smooth effect */
 }
 
-@media only screen and (min-width: 600px) {
+.rating-icon:hover {
+    transform: scale(1.2);
+    /* Increase size on hover */
+}
+.spin-icon {
+    animation: spin 2s infinite linear;
+}
 
-    /* Adjustments for small screens and up */
-    .responsive-card {
-        width: 50%;
-        /* Adjust width for small screens and up */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
     }
-}
 
-@media only screen and (min-width: 960px) {
-
-    /* Adjustments for medium screens and up */
-    .responsive-card {
-        width: 33%;
-        /* Adjust width for medium screens and up */
-    }
-}
-
-@media only screen and (min-width: 1264px) {
-
-    /* Adjustments for large screens and up */
-    .responsive-card {
-        width: 25%;
-        /* Adjust width for large screens and up */
+    to {
+        transform: rotate(360deg);
     }
 }
 </style>
