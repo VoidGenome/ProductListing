@@ -27,8 +27,8 @@
                         <v-col cols="1">
                             <v-tooltip>
                                 <template v-slot:activator="{ props }">
-                                    <v-btn v-bind="props" variant="flat" @click='dialogModel = true'
-                                        class="addButtonColor"><v-icon>mdi-plus</v-icon></v-btn>
+                                    <v-btn rounded v-bind="props" variant="flat" @click='dialogModel = true'
+                                        class="addButtonColor"><v-icon style='color:white'>mdi-plus</v-icon></v-btn>
                                 </template>
                                 <span>Add items</span>
                             </v-tooltip>
@@ -61,12 +61,13 @@
             <v-container>
                 <v-row>
                     <div class="mr-10 mb-5" v-for="(item, index) in computedArrayOfItems" :key="index">
-                        <v-card height="300px" width="300px" class="rounded-card responsive-card">
+                        <v-card height="250px" width="300px" class="rounded-card responsive-card">
                             <v-card-title class="titleStyle">{{ item.title }}</v-card-title>
                             <v-divider />
                             <v-tooltip>
                                 <template v-slot:activator="{ props }">
                                     <img v-bind="props" :src="item.image" width="40%" height="40%" />
+                                    
                                 </template>
                                 <v-card style="height: auto;width:300px">
                                     <v-container>
@@ -85,6 +86,7 @@
                                 :style="+item.rating.rate < 3.0 ? 'color:red' : 'background-color:yellow'"><v-icon>mdi-star-outline</v-icon><span
                                     :style="'font-color:black'">{{item.rating.rate
                                     }}</span></v-chip>
+
                             <div class="likeButton">
                                 <v-icon color='pink'>mdi-heart</v-icon> <small>{{ item.rating.count }}</small>
                             </div>
@@ -129,7 +131,6 @@ import AddItem from "./AddItem.vue"
 
 let loading = ref(true)
 let dialogModel =ref(false)
-// let fab = reactive(false)
 let category = ref("allCategories")
 let arrayOfItems = reactive({items:[]})
 let searchValue = ref("")
@@ -201,7 +202,6 @@ function updateLoadItemsData(val) {
 onMounted(() => {
     console.log(arrayOfItems, "then")
     loadItems()
-    // Perform actions after the component is mounted
     
 });
 watchEffect(() => {
